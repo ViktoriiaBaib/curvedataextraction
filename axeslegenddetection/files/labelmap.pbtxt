@@ -1,0 +1,14 @@
+item{
+	id: 1
+	name: 'X_axis'
+}
+
+item{
+	id: 2
+	name: 'Y_axis'
+}
+
+item{
+	id: 3
+	name: 'Legend'
+}
