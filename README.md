@@ -8,13 +8,13 @@
 
 3. Create anaconda variable
 ```
-conda create -n imgrec python=3.10
+conda create -n imgrec python=3.9
 conda install -n imgrec pip
 conda activate imgrec
 ```
-4. Install Tensorflow 2.8
+4. Install Tensorflow 2.7
 ```
-pip install TensorFlow==2.8
+pip install TensorFlow==2.7
 ```
 5. Install protobuf (probably it is already there after previous step; try installation via brew for macOS)
 ```
