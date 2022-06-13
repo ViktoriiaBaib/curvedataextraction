@@ -48,12 +48,17 @@ def hex2rgb(hex_code):
     h = hex_code.lstrip('#')
     return tuple(int(h[i:i+2], 16)/255 for i in (0, 2, 4))
 
+def rgb2hex(color):
+    [r,g,b] = color
+    rgb = (int(np.round(255*r)), int(np.round(255*g)), int(np.round(255*b)))
+    return '#%02x%02x%02x' % rgb
+
 def squared_distance(p, q):
     """given points p and q returns the sum of the squares"""   
     return sum((p_i - q_i) ** 2 for p_i, q_i in zip(p, q))
 
 def closest_index(pixels,  colors):
-    """given a point a list of points, returns the index of the closest element"""
+    """given a pixel point and a list of color points, returns the index of the closest color point"""
     return min(range(len(colors)), key=lambda i: squared_distance(pixels, colors[i]))
 
 def get_matrix(image_array, colorsrgb):
@@ -63,6 +68,59 @@ def get_matrix(image_array, colorsrgb):
 def get_cluster_data(matrix,index):
     """returns list of (x,y) pixel coordinates of pixels associated with this cluster"""
     return [(j,i) for i,_ in enumerate(matrix) for j,_ in enumerate(matrix[i]) if matrix[i][j]==index]
+
+def mean(ps):
+    """given a list of points, check if the cluster is emply, return the single point
+    whose first element is the average of all the first elements,
+    whose second element is the average of all the second elements, and so on"""   
+    n = len(ps)
+    if n > 0:
+        k = len(ps[0])
+        mean = [sum(p[i] for p in ps) / n for i in range(k)]
+    else:
+        mean = None
+    return mean
+
+def average_distance(means, new_mean_set, drop_out):
+    """drop out the cluster if needed, calculate the average distance in RGB space between cluster centers"""
+    if len(drop_out)>0:
+        means = [means[idx] for idx in range(len(means)) if idx not in drop_out]
+    distances = [squared_distance(means[i],new_mean_set[i]) for i in range(len(means))]
+    return np.mean(np.array([(d)**0.5 for d in distances]))
+
+def new_means(ps, old_means):
+    """given a list of points and some cluster means,
+    assign each point to its closest cluster,
+    and then compute the means of the new clusters and indexes of dropped clusters"""
+    positions = list(range(len(old_means)))
+    indexes = [closest_index(p, old_means) for p in ps]
+    return [mean([p for p, i in zip(ps, indexes) if i == j]) for j in Counter(indexes).keys()], [idx for idx in positions if idx not in Counter(indexes).keys()]
+
+def k_means(ps, num_iterations, convergence):
+    """given a list of points, start with basic 8 color palette,
+    then compute new_means num_iteration times or until convergence criteria is reached,
+    returning the final means and convergence path"""
+    #white, red, green, blue, yellow, purple, cyan, black
+    means = [[0.99, 0.99, 0.99], [0.99, 0.01, 0.01], [0.01, 0.99, 0.01], [0.01, 0.01, 0.99], [0.99, 0.99, 0.01], [0.99, 0.01, 0.99], [0.01, 0.99, 0.99], [0.01, 0.01, 0.01]]
+    track_convergence = []
+    for i in range(num_iterations):
+        drop_out = []
+        new_mean_set, drop_out = new_means(ps, means)
+        #print (i, new_mean_set)
+        track_convergence.append(average_distance(means,new_mean_set,drop_out))
+        if len(track_convergence)>2 and track_convergence[-1] < convergence and track_convergence[-2] < convergence:
+            break
+        else:
+            means = new_mean_set
+    return new_mean_set
+
+
+def detect_colors(image_array,num_iterations = 12, convergence = 0.05):
+    """returns image palette with cluster centers as a list of hex codes"""
+    im = image_array[:, :, :3]/255
+    flattened = [pixel for row in im for pixel in row]
+    palette = k_means(flattened, num_iterations, convergence)
+    return palette
 
 def save_cluster(cluster, index, colorhex, img_filename):
     """save cluster image"""
