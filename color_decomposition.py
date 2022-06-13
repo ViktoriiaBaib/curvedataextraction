@@ -4,8 +4,8 @@ import re
 import cv2
 import numpy as np
 from PIL import Image
-from dominant_color_detection import detect_colors
-from posterization import preprocess, hex2rgb, save_palette, get_matrix, save_cluster, save_json, get_cluster_data, data_score_mult
+from posterization import detect_colors
+from posterization import preprocess, rgb2hex, save_palette, get_matrix, save_cluster, save_json, get_cluster_data, data_score_mult
 
 PATH_TO_DIR = 'images'
 
@@ -24,14 +24,15 @@ for image_name in images:
 	if (image_arr<255).any():
 		image = Image.fromarray(image_arr)
 		image.save(os.path.join(PATH_TO_DIR,image_name)[:-4]+'_colorcut.png')
-		colors, _ = detect_colors(os.path.join(PATH_TO_DIR,image_name)[:-4]+'_colorcut.png')
-		colorsrgb = [hex2rgb(colors[i]) for i in range(len(colors))]
+		colorsrgb = detect_colors(image_arr)
+		#print('colors: ',colorsrgb, type(colorsrgb))
 		save_palette([colorsrgb],os.path.join(PATH_TO_DIR,image_name))
 		matrix = get_matrix(image_arr,colorsrgb)
-		for i in range(1,5):
+		for i in range(len(colorsrgb)):
 			cluster = get_cluster_data(matrix,i)
-			if len(cluster)>100:
+			if len(cluster)>300:
 				score_m = data_score_mult(cluster)
+				#print('Cluster '+str(i)+' score: ', score_m)
 				if score_m > 0.66:
-					save_cluster(cluster,i,colors[i],os.path.join(PATH_TO_DIR,image_name))
-					save_json(cluster,colors[i],i,os.path.join(PATH_TO_DIR,image_name))
+					save_cluster(cluster,i,rgb2hex(colorsrgb[i]),os.path.join(PATH_TO_DIR,image_name))
+					save_json(cluster,rgb2hex(colorsrgb[i]),i,os.path.join(PATH_TO_DIR,image_name))
