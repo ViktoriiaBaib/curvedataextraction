@@ -11,10 +11,9 @@ import argparse
 from final_record_func import get_scaling, save_json
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-x','--xunits', default='um', type=str, help='Units of measurement for X axis. Options are: um, cm-1, eV, nm, eV/h_bar')
-#parser.add_argument('-y','--yunits', default='1', type=str, help='Units of measurement for Y axis. Options are: 1, au')
+parser.add_argument('-ax','--axscale', default='xy', type=str, help='Axes to rescale. Options: x, y, xy')
 args = parser.parse_args()
-xaxunits = args.xunits
+scale_mode = args.axscale
 
 reader = easyocr.Reader(['en'], gpu=True)
 allowlist = '0123456789.-'
@@ -40,19 +39,30 @@ for i,clustername in enumerate(clusternames):
 	f = open(os.path.join('images',clustername))  
 	cluster = json.load(f)
 	f.close()
-	AXIS = [xname for xname in axisnames if re.match(FILE+'_X_axis', xname)][0]
-	print(AXIS)
-	f = open(os.path.join('images',AXIS))
-	print(os.path.join('images',AXIS))
+	XAXIS = [xname for xname in axisnames if re.match(FILE+'_X_axis', xname)][0]
+	YAXIS = [xname for xname in axisnames if re.match(FILE+'_Y_axis', xname)][0]
+	print(XAXIS,YAXIS)
+	f = open(os.path.join('images',XAXIS))
+	print(os.path.join('images',XAXIS))
 	x_axis_json = json.load(f)
 	f.close()
-	x_axis_img = cv2.imread(os.path.join('images',AXIS[:-4]+'png'))
-	print(os.path.join('images',AXIS[:-4]+'png'))
-	[confidence, a1, x_box] = get_scaling(x_axis_json, x_axis_img, reader, allowlist)
+	x_axis_img = cv2.imread(os.path.join('images',XAXIS[:-4]+'png'))
+	print(os.path.join('images',XAXIS[:-4]+'png'))
+	[confidence, x_a1, x_box] = get_scaling(x_axis_json, x_axis_img, reader, allowlist, 'x')
 	if confidence == 'unconfident':
 		print(i, clustername, FILE, confidence)
 		continue
 	else:
-		save_json(FILE, clustername, cluster, x_box, a1, xaxunits)
-		print(i, clustername, FILE, confidence)
+		f = open(os.path.join('images',YAXIS))
+		print(os.path.join('images',YAXIS))
+		y_axis_json = json.load(f)
+		f.close()
+		y_axis_img = cv2.imread(os.path.join('images',YAXIS[:-4]+'png'))
+		print(os.path.join('images',YAXIS[:-4]+'png'))
+		[confidence, y_a1, y_box] = get_scaling(y_axis_json, y_axis_img, reader, allowlist, 'y')
+		if confidence == 'unconfident':
+			continue
+		else:
+			save_json(FILE, clustername, cluster, x_box, x_a1, y_box, y_a1)
+			print(i, clustername, FILE, confidence)
 
