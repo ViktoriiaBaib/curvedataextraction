@@ -87,12 +87,11 @@ You should obtain png of color cut and palette as well as json and png of separa
 ```
 python final-record.py 
 ```
-You can also specify x axis units running as
-```
-python final-record.py -x um
-```
 You should obtain json files of final records for all successfully detected clusters.
-
+You can perplot them with replot_final_record.py providing the name of the file as
+```
+python replot_final_record.py -f images/0_colorcut_cluster_5final_record.json
+```
 To work with your figure put figure.PNG to images/.
 
 *Regarding the TFOD API part, thanks to https://github.com/TannerGilbert/Tensorflow-Object-Detection-API-Train-Model*
