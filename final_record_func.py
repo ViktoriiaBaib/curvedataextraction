@@ -128,3 +128,9 @@ def save_json(name, cluster_name, cluster, x_box, x_a1, y_box, y_a1):
     cluster_name_out = cluster_name[:-5]+'final_record.json'
     with open(os.path.join('images',cluster_name_out), 'w') as outfile:
         json.dump(record, outfile)
+    X = np.array(record['data'])[:,0]
+    Y = np.array(record['data'])[:,1]
+    fig = plt.figure(figsize=(8,6))
+    plt.plot(X,Y,color = record['color'])
+    fig.savefig(os.path.join('images',cluster_name_out)[:-4]+'png')
+    plt.close('all')
