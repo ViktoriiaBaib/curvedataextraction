@@ -1,3 +1,5 @@
+# Installation
+
 *Automated curve data extraction. Works with colored curves. Cross-platform. Color decomposition with k-means. X units parser. Automatic axes scale recognition.*
 
 1. Download and unzip **folder** from https://drive.google.com/file/d/1e0UTKwhgJN9DuD2qYsLcWcKd6WomvRkl/view?usp=sharing
