@@ -92,3 +92,8 @@ You should obtain json files and png images of final records for all successfull
 To work with your figure put figure.PNG to images/.
 
 *Regarding the TFOD API part, thanks to https://github.com/TannerGilbert/Tensorflow-Object-Detection-API-Train-Model*
+
+# Citation
+
+If you find this tool or any of it's parts useful, please cite our paper https://www.nature.com/articles/s41597-022-01699-3
+You can also find more details regarding the usage of the algorithm there.
